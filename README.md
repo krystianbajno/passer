@@ -1,3 +1,10 @@
+# What is it for
+If you have a test to prepare for, create questions and then study for the exam by solving the quiz you made for yourself.
+
+# How to
+Generate the zip file on the creator page, and then import the zip file on the actual assessment page. Have fun!
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
