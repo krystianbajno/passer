@@ -1,6 +1,6 @@
 import FileSaver from "file-saver"
 import JSZip from "jszip"
-import React, { useState } from "react"
+import React from "react"
 import NewQuestion from "../components/creator/new-question"
 import NewQuestionAnswer from "../components/creator/new-question-answer"
 import NewQuestionImage from "../components/creator/new-question-image"
@@ -80,7 +80,7 @@ class Creator extends React.Component {
   addQuestionImage = async (question_id, image) => {
     const newState = Object.assign({}, this.state)
 
-    const data = await new Response(image).text()
+    const data = await new Response(image).blob()
 
     const extension = image.type
       .split('/')
@@ -122,15 +122,20 @@ class Creator extends React.Component {
   }
 
   downloadExam = async () => {
-    const questionsData = `id,description,explanation\n` + Object.keys(this.state.questions).map(question => {
-      return `${question},${this.state.questions[question].description},${this.state.questions[question].explanation}`
+    const state = this.state
+    
+    // remove nulls
+    Object.keys(state).forEach((k) => state[k] == null && delete state[k]);
+
+    const questionsData = `id,description,explanation\n` + Object.keys(state.questions).map(question => {
+      return `${question},${this.state.questions[question].description},${state.questions[question].explanation}`
     }).join("\n")
 
-    const answersData = `id,question_id,description,is_valid\n` + this.state.answers.map(answer => {
+    const answersData = `id,question_id,description,is_valid\n` + state.answers.map(answer => {
       return `${answer.id},${answer.question_id},${answer.description},${answer.is_valid}`
     }).join("\n")
 
-    const questionsImagesData = `id,question_id,path\n` + this.state.questions_data.map(image => {
+    const questionsImagesData = `id,question_id,path\n` + state.questions_data.map(image => {
       return `${image.id},${image.question_id},${image.path}`
     }).join("\n")
 
@@ -140,12 +145,13 @@ class Creator extends React.Component {
     zip.file("questions_data.csv", questionsImagesData)
     const zipData = zip.folder("data")
 
-    for (const image of this.state.questions_data) {
-        zipData.file(image.fileName, image.data)
+
+    for (const image of state.questions_data) {
+        zipData.file(image.fileName, new Blob([image.data]))
     }
 
     zip.generateAsync({type: "blob"}).then(zipFile => {
-        FileSaver.saveAs(zipFile, this.state.report_name + ".zip")
+        FileSaver.saveAs(zipFile, state.report_name + ".zip")
     })
   }
 
