@@ -12,6 +12,10 @@ code {
     monospace;
 }
 
+.creator {
+  text-align: center;
+}
+
 .questions {
   width: 100%;
   display: flex;

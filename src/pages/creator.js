@@ -4,6 +4,7 @@ import React from "react"
 import NewQuestion from "../components/creator/new-question"
 import NewQuestionAnswer from "../components/creator/new-question-answer"
 import NewQuestionImage from "../components/creator/new-question-image"
+import pJson from '../../package.json';
 
 class Creator extends React.Component {
   state = {
@@ -123,21 +124,30 @@ class Creator extends React.Component {
 
   downloadExam = async () => {
     const state = this.state
-    
-    // remove nulls
-    Object.keys(state).forEach((k) => state[k] == null && delete state[k]);
+    state.questions_data = state.questions_data.filter(n => n)
+    state.answers = state.answers.filter(n => n)
 
-    const questionsData = `id,description,explanation\n` + Object.keys(state.questions).map(question => {
-      return `${question},${this.state.questions[question].description},${state.questions[question].explanation}`
-    }).join("\n")
+    let questionsData = `id,description,explanation\n` 
+    Object.keys(state.questions).map(question => {
+      if (question && this.state.questions[question]) {
+        questionsData = questionsData +`"${question}","${this.state.questions[question].description.replace(/\"/g, "\'\'")}","${state.questions[question].explanation.replace(/\"/g, "\'\'")}"\n`
+      }
+    })
 
-    const answersData = `id,question_id,description,is_valid\n` + state.answers.map(answer => {
-      return `${answer.id},${answer.question_id},${answer.description},${answer.is_valid}`
-    }).join("\n")
+    let answersData = `id,question_id,description,is_valid\n`
+    state.answers.map(answer => {
+      if (answer) {
+        answersData = answersData + `"${answer.id}","${answer.question_id}","${answer.description.replace(/\"/g, "\'\'")}","${answer.is_valid}"\n`
+      }
+    })
 
-    const questionsImagesData = `id,question_id,path\n` + state.questions_data.map(image => {
-      return `${image.id},${image.question_id},${image.path}`
-    }).join("\n")
+  
+    let questionsImagesData = `id,question_id,path\n` 
+    state.questions_data.map(image => {
+      if (image) {
+        questionsImagesData = questionsImagesData + `"${image.id}","${image.question_id}","${image.path}"\n`
+      }
+    })
 
     const zip = new JSZip();
     zip.file("questions.csv", questionsData)
@@ -146,6 +156,7 @@ class Creator extends React.Component {
     const zipData = zip.folder("data")
 
 
+    console.log(state.questions_data)
     for (const image of state.questions_data) {
         zipData.file(image.fileName, new Blob([image.data]))
     }
@@ -156,9 +167,10 @@ class Creator extends React.Component {
   }
 
   render = () => 
-    <div className="App">
-      <h1>Passer Creator 0.0.1</h1>
+    <div className="creator">
+      <h1>Passer Creator {pJson.version}</h1>
       <h3>Create your questions, then export them and import into the Passer ;) Gl Hf</h3>
+      <a href="/">Quiz</a>
 
       <div className="questions">
           <h2>Questions:</h2>
