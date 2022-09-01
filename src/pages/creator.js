@@ -129,8 +129,8 @@ class Creator extends React.Component {
 
     let questionsData = `id,description,explanation\n` 
     Object.keys(state.questions).map(question => {
-      if (question && this.state.questions[question]) {
-        questionsData = questionsData +`"${question}","${this.state.questions[question].description.replace(/\"/g, "\'\'")}","${state.questions[question].explanation.replace(/\"/g, "\'\'")}"\n`
+      if (question && state.questions[question]) {
+        questionsData = questionsData +`"${question}","${state.questions[question].description.replace(/\"/g, "\'\'")}","${state.questions[question].explanation && state.questions[question].explanation.replace(/\"/g, "\'\'")}"\n`
       }
     })
 
@@ -156,7 +156,6 @@ class Creator extends React.Component {
     const zipData = zip.folder("data")
 
 
-    console.log(state.questions_data)
     for (const image of state.questions_data) {
         zipData.file(image.fileName, new Blob([image.data]))
     }
