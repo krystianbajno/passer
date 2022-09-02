@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import './App.css';
+import './styles/index.css';
+import './styles/App.css';
+import './styles/quiz.css';
+
 import reportWebVitals from './reportWebVitals';
 import {
   BrowserRouter,

@@ -1,0 +1,121 @@
+.quiz {
+  color: rgb(222, 222, 222);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: rgb(41, 41, 41);
+  height: 100vh;
+  overflow-x: hidden;
+}
+
+.quiz button {
+  background-color: rgb(75, 13, 50);
+  border: 0;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: rgb(222, 222, 222);
+  margin: 4px 4px;
+}
+
+.quiz button:hover{
+  transition: 0.2s;
+  background-color: rgb(37, 13, 30);
+}
+
+input[type='checkbox'] {
+  accent-color: rgb(117, 38, 93);
+}
+
+.quiz input::file-selector-button {
+  background-color: rgb(75, 13, 50);
+  border: 0;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: rgb(222, 222, 222);
+}
+
+
+.quiz > .question {
+  min-height: 600px;
+}
+
+.quiz > .control-panel {
+  color: rgb(222, 222, 222);
+  width: 100%;
+  background-color: rgb(20, 20, 20);
+  margin: 0;
+  padding: 8px;
+}
+
+.quiz-head {
+  color: rgb(222, 222, 222);
+  font-weight: 100;
+  letter-spacing: 2px;
+  font-family: "Lucida Console";
+}
+
+.quiz-body {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(30,30,30);
+  color: rgb(222, 222, 222);
+  align-items: center;
+  padding: 18px 32px;
+}
+
+.quiz-nav {
+  color: rgb(160, 24, 106);
+  letter-spacing: 2px;
+  font-family: "Lucida Console";
+}
+
+.quiz-greets {
+  color: rgb(222, 222, 222);
+  font-weight: 700;
+}
+
+.quiz-image > img {
+  width: 100%;
+  object-fit: contain;
+  max-height: 300px;
+}
+
+.quiz-answer {
+  margin-top: 4px;
+}
+
+.quiz-question {
+  max-width: 800px;
+  width:100%;
+}
+
+.quiz-answer label {
+  cursor: pointer;
+}
+
+.quiz-answers {
+  min-width: 800px;
+  width:100%;
+  text-align: left;
+  margin-top: 16px;
+
+}
+
+.quiz-question {
+  text-align: left;
+}
+
+.quiz-description {
+  letter-spacing: 2px;
+  text-align: left;
+  font-size: 14px;
+  margin: 32px 0;
+}
+
+.question-explanation {
+  padding: 24px 0;
+  text-align: left;
+}

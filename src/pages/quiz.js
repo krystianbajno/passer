@@ -48,7 +48,6 @@ class Quiz extends React.Component {
     answers = csv.toObjects(await read.file("answers.csv").async("string"))
     questions = csv.toObjects(await read.file("questions.csv").async("string"))
     questionsData = csv.toObjects(await read.file("questions_data.csv").async("string"))
-    // images = await zip.folder("data/")
 
     for (const question of questions) {
       question.answers = {}
@@ -114,7 +113,13 @@ class Quiz extends React.Component {
       }
     }
 
-    return {maxPoints, points}
+    if (points < 0) {
+      points = 0
+    }
+
+    const passed = points/maxPoints > 0.9
+
+    return {maxPoints, points, passed}
   }
 
   shuffle = async () => {
@@ -211,9 +216,9 @@ class Quiz extends React.Component {
     const score = this.scoreCalculator()
 
     return <div className="quiz">
-      <h1>Passer Quiz {pJson.version}</h1>
-      <a href="/creator">Creator</a>
-      <h3>Good luck, have fun :)</h3>
+      <h1 className="quiz-head">Passer Quiz {pJson.version}</h1>
+      <a className="quiz-nav" href="/creator">Creator</a>
+      <h3 className="quiz-greets">Good luck, have fun :)</h3>
 
       <div className="control-panel">
         <input className="exam-input" type="file" onChange={(e) => this.unmarshall(e.target.files[0])}></input>
@@ -223,61 +228,66 @@ class Quiz extends React.Component {
           examMode: !previousState.examMode
         }))} checked={this.state.examMode}/>{this.state.examMode} Exam mode</label>
       </div>
+      <div className="quiz-body">
+        {(this.state.examFinished || !this.state.examMode) && 
+          <div>
+            <div>Passed: {score.passed ? "Yes" : "No"}</div>
+            <div>Score: {score.points}/{score.maxPoints}</div>
+          </div>
+        }
 
-      {(this.state.examFinished || !this.state.examMode) && <div>Score: {score.points}/{score.maxPoints}</div>}
+        {!this.state.examFinished ? (question && <QuizQuestion
+          onAnswerChange={(c) => {
+            this.setState((previous, props) => {
+              const toChange = previous.currentQuestionAnswers
 
-      {!this.state.examFinished ? (question && <QuizQuestion
-        onAnswerChange={(c) => {
-          this.setState((previous, props) => {
-            const toChange = previous.currentQuestionAnswers
+              if (!previous.currentQuestionAnswers.includes(c)) {
+                toChange.push(c)
+              } else {
+                toChange.splice(toChange.indexOf(c), 1)
+              }
 
-            if (!previous.currentQuestionAnswers.includes(c)) {
-              toChange.push(c)
-            } else {
-              toChange.splice(toChange.indexOf(c), 1)
-            }
+              return {
+                currentQuestionAnswers: toChange
+              }
+            })
+          }}
+          questionIndex={this.state.questionsOrder.indexOf(question.id)}
+          questionAnswers={this.state.currentQuestionAnswers}
+          questionAnsweredCorrectly={this.wasSpecifiedQuestionAnsweredCorrectly(question.id)}
+          question={question}
+          shouldReveal={this.shouldHighlightRightWrong()}
+        />) : <div>
+          <h3>Answered incorrectly: </h3>
+          {Object.keys(this.state.questions).filter((q) => {
+            return !this.wasSpecifiedQuestionAnsweredCorrectly(q)
+          }).map(q => {
+            const question = this.state.questions[q]
+            const finalQuestionAnswers = this.state.answers[
+              this.state.questionsOrder[this.state.questionsOrder.indexOf(question.id)]
+            ]
 
-            return {
-              currentQuestionAnswers: toChange
-            }
-          })
-        }}
-        questionIndex={this.state.questionsOrder.indexOf(question.id)}
-        questionAnswers={this.state.currentQuestionAnswers}
-        questionAnsweredCorrectly={this.wasSpecifiedQuestionAnsweredCorrectly(question.id)}
-        question={question}
-        shouldReveal={this.shouldHighlightRightWrong()}
-      />) : <div>
-        <h2>Answered wrong: </h2>
-        {Object.keys(this.state.questions).filter((q) => {
-          return !this.wasSpecifiedQuestionAnsweredCorrectly(q)
-        }).map(q => {
-          const question = this.state.questions[q]
-          const finalQuestionAnswers = this.state.answers[
-            this.state.questionsOrder[this.state.questionsOrder.indexOf(question.id)]
-          ]
-
-          return <QuizQuestion
-            onAnswerChange={() => false}
-            questionIndex={this.state.questionsOrder.indexOf(question.id)}
-            questionAnsweredCorrectly={this.wasSpecifiedQuestionAnsweredCorrectly(question.id)}
-            questionAnswers={finalQuestionAnswers}
-            question={question}
-            shouldReveal={true}
-          />
-        })}
-      </div>}
-
-      <div className="control-panel">
-          { !this.state.examFinished && (!this.state.questionsOrder.length || !this.isFirstQuestion()) 
-            && <button onClick={() => this.previousQuestion()} className="previous-question">Previous</button>}
-          
-          { !this.isLastQuestion() && 
-            <button onClick={() => this.nextQuestion()} className="next-question">Next</button>}
-
-          { !this.state.examFinished && (!this.state.questionsOrder.length || this.isLastQuestion()) &&
-            <button onClick={() => this.finishExam()} className="finish-question">Finish exam</button>}
+            return <QuizQuestion
+              onAnswerChange={() => false}
+              questionIndex={this.state.questionsOrder.indexOf(question.id)}
+              questionAnsweredCorrectly={this.wasSpecifiedQuestionAnsweredCorrectly(question.id)}
+              questionAnswers={finalQuestionAnswers}
+              question={question}
+              shouldReveal={true}
+            />
+          })}
+        </div>}
       </div>
+      {(!this.state.examFinished && this.state.questionsOrder.length) ? <div className="control-panel">
+            { !this.isFirstQuestion() &&  
+              <button onClick={() => this.previousQuestion()} className="previous-question">Previous</button>}
+          
+            { !this.isLastQuestion() && 
+              <button onClick={() => this.nextQuestion()} className="next-question">Next</button>}
+
+            { (this.isLastQuestion()) &&
+              <button onClick={() => this.finishExam()} className="finish-question">Finish exam</button>}
+      </div> : <></>}
     </div>
   }
 }
