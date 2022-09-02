@@ -14,8 +14,9 @@ const QuizAnswer = ({answer, onCheck, checked, shouldReveal }) => {
             <input 
                 value={answer.id} 
                 checked={checked}
+                defaultChecked={checked}
                 type="checkbox"
-                onClick={onCheck}
+                onChange={onCheck}
             />
             {answer.description}
         </label>

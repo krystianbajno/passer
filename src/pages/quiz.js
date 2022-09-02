@@ -143,24 +143,38 @@ class Quiz extends React.Component {
     this.setState(() => state)
   }
 
+  answerQuestionPrevious = () => {
+    const state = this.state
+    const questionId = state.currentQuestionId
+    const answerIds = state.currentQuestionAnswers
+
+    if (state.answers[this.state.currentQuestionId]) {
+      state.answers[questionId] = answerIds
+      state.currentQuestionAnswers = []
+      this.setState(() => state)
+    }
+  }
+
   nextQuestion = () => {
     this.answerQuestion()
     const index = this.state.questionsOrder.indexOf(this.state.currentQuestionId)
 
     if (this.state.questionsOrder[index + 1]) {
       this.setState((prev, props) => ({
-        currentQuestionId: this.state.questionsOrder[index + 1]
+        currentQuestionId: this.state.questionsOrder[index + 1],
+        currentQuestionAnswers: this.state.answers[this.state.questionsOrder[index + 1]] || []
       }))
     }
   }
 
   previousQuestion = () => {
-    this.answerQuestion()
+    this.answerQuestionPrevious()
     const index = this.state.questionsOrder.indexOf(this.state.currentQuestionId)
     
     if (this.state.questionsOrder[index - 1]) {
       this.setState((prev, props) => ({
-        currentQuestionId: this.state.questionsOrder[index - 1]
+        currentQuestionId: this.state.questionsOrder[index - 1],
+        currentQuestionAnswers: this.state.answers[this.state.questionsOrder[index - 1]] || []
       }))
     }
   }
@@ -193,6 +207,7 @@ class Quiz extends React.Component {
 
       {question && <QuizQuestion
         onAnswerChange={(c) => {
+          console.log(c)
           this.setState((previous, props) => {
             const toChange = previous.currentQuestionAnswers
 

@@ -25,7 +25,7 @@ const QuizQuestion = (props) => {
         <div className="quiz-answers">
           {Object.keys(question.answers).map((answerId) => {
               const answer = question.answers[answerId]
-
+              
               return <QuizAnswer
                 checked={questionAnswers.includes(answer.id)}
                 onCheck={(e) => onAnswerChange(e.target.value)}
