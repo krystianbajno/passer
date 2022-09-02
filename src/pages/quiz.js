@@ -73,29 +73,48 @@ class Quiz extends React.Component {
     this.setState((previousState, props) => (state))
   }
 
-  questionAnsweredCorrectly = (questionId) => {
-  // 
+  wasQuestionAnsweredCorrectly = (selectedQuestionAnswers, allQuestionAnswers) => {
+    if (!selectedQuestionAnswers) {
+      return false
+    }
+
+    for (const questionAnswerId of Object.keys(allQuestionAnswers)) {
+      const questionAnswer = allQuestionAnswers[questionAnswerId]
+      if (!questionAnswer.is_valid && selectedQuestionAnswers.includes(questionAnswerId)) {
+        return false;
+      }
+      if (questionAnswer.is_valid && !selectedQuestionAnswers.includes(questionAnswerId)) {
+        return false;
+      }
+    }
+
+    return true
+  }
+
+  wasSpecifiedQuestionAnsweredCorrectly(questionId) {
+    const selectedQuestionAnswers = this.state.answers[questionId]
+    const allQuestionAnswers = this.state.questions[questionId].answers
+
+    return this.wasQuestionAnsweredCorrectly(selectedQuestionAnswers, allQuestionAnswers)
   }
 
   
   scoreCalculator = () => {
-    // let points = 0
-    // const perQuestion = 10
-    // const questionCount = this.state.questionsOrder.length
+    let points = 0
+    const perQuestion = 10
+    const questionCount = this.state.questionsOrder.length
 
-    // const max = perQuestion * questionCount
+    const maxPoints = perQuestion * questionCount
 
-    // for (const questionId of Object.keys(this.state.answers)) {
-    //   for (const answerId of this.state.answers[questionId]) {
-    //     if (this.state.questions[questionId][answerId].is_valid) {
-    //       points = points + perQuestion
-    //     } else {
-    //       points = points - perQuestion * 2
-    //     }
-    //   }
-    // }
+    for (const questionId of Object.keys(this.state.answers)) {
+      if (this.wasSpecifiedQuestionAnsweredCorrectly(questionId)) {
+        points = points + perQuestion
+      } else {
+        points = points - perQuestion * 2
+      }
+    }
 
-    // return points/max
+    return {maxPoints, points}
   }
 
   shuffle = async () => {
@@ -189,6 +208,8 @@ class Quiz extends React.Component {
   render = () => {
     const question = this.state.questions[this.state.currentQuestionId]
 
+    const score = this.scoreCalculator()
+
     return <div className="quiz">
       <h1>Passer Quiz {pJson.version}</h1>
       <a href="/creator">Creator</a>
@@ -203,11 +224,10 @@ class Quiz extends React.Component {
         }))} checked={this.state.examMode}/>{this.state.examMode} Exam mode</label>
       </div>
 
-      {/* {this.state.examFinished && <div>Score: {this.scoreCalculator()}</div>} */}
+      {(this.state.examFinished || !this.state.examMode) && <div>Score: {score.points}/{score.maxPoints}</div>}
 
-      {question && <QuizQuestion
+      {!this.state.examFinished ? (question && <QuizQuestion
         onAnswerChange={(c) => {
-          console.log(c)
           this.setState((previous, props) => {
             const toChange = previous.currentQuestionAnswers
 
@@ -222,20 +242,40 @@ class Quiz extends React.Component {
             }
           })
         }}
-        questionIndex={this.state.questionsOrder.indexOf(this.state.currentQuestionId)}
+        questionIndex={this.state.questionsOrder.indexOf(question.id)}
         questionAnswers={this.state.currentQuestionAnswers}
+        questionAnsweredCorrectly={this.wasSpecifiedQuestionAnsweredCorrectly(question.id)}
         question={question}
         shouldReveal={this.shouldHighlightRightWrong()}
-      />}
+      />) : <div>
+        <h2>Answered wrong: </h2>
+        {Object.keys(this.state.questions).filter((q) => {
+          return !this.wasSpecifiedQuestionAnsweredCorrectly(q)
+        }).map(q => {
+          const question = this.state.questions[q]
+          const finalQuestionAnswers = this.state.answers[
+            this.state.questionsOrder[this.state.questionsOrder.indexOf(question.id)]
+          ]
+
+          return <QuizQuestion
+            onAnswerChange={() => false}
+            questionIndex={this.state.questionsOrder.indexOf(question.id)}
+            questionAnsweredCorrectly={this.wasSpecifiedQuestionAnsweredCorrectly(question.id)}
+            questionAnswers={finalQuestionAnswers}
+            question={question}
+            shouldReveal={true}
+          />
+        })}
+      </div>}
 
       <div className="control-panel">
-          { !this.state.questionsOrder.length || !this.isFirstQuestion() 
+          { !this.state.examFinished && (!this.state.questionsOrder.length || !this.isFirstQuestion()) 
             && <button onClick={() => this.previousQuestion()} className="previous-question">Previous</button>}
           
           { !this.isLastQuestion() && 
             <button onClick={() => this.nextQuestion()} className="next-question">Next</button>}
 
-          { !this.state.questionsOrder.length || this.isLastQuestion() &&
+          { !this.state.examFinished && (!this.state.questionsOrder.length || this.isLastQuestion()) &&
             <button onClick={() => this.finishExam()} className="finish-question">Finish exam</button>}
       </div>
     </div>
