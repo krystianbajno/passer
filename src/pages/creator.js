@@ -130,14 +130,14 @@ class Creator extends React.Component {
     let questionsData = `id,description,explanation\n` 
     Object.keys(state.questions).map(question => {
       if (question && state.questions[question]) {
-        questionsData = questionsData +`"${question}","${state.questions[question].description.replace(/\"/g, "\'\'")}","${state.questions[question].explanation && state.questions[question].explanation.replace(/\"/g, "\'\'")}"\n`
+        questionsData = questionsData +`"${question}","${state.questions[question].description && state.questions[question].description.replace(/\"/g, "\'\'")}","${state.questions[question].explanation && state.questions[question].explanation.replace(/\"/g, "\'\'")}"\n`
       }
     })
 
     let answersData = `id,question_id,description,is_valid\n`
     state.answers.map(answer => {
       if (answer) {
-        answersData = answersData + `"${answer.id}","${answer.question_id}","${answer.description.replace(/\"/g, "\'\'")}","${answer.is_valid}"\n`
+        answersData = answersData + `"${answer.id}","${answer.question_id}","${answer.description && answer.description.replace(/\"/g, "\'\'")}","${answer.is_valid}"\n`
       }
     })
 
